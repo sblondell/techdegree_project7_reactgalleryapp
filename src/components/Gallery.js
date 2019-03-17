@@ -6,12 +6,6 @@ import Image from './Image.js';
 
 //const Gallery = ({list, match}) => {
 class Gallery extends Component {
-	constructor() {
-		super();
-		this.state = {
-			customLoaded: false
-		}
-	}
 	/*
 	 * Creates an array of JSX Image components or a "search not found" message wrapped in a try/catch which
 	 * guards against searches for absent data in the gallery. ex. "/gallery/nfj#93jfn"
@@ -20,10 +14,16 @@ class Gallery extends Component {
 	//const populatePage = (topic) => {
 	populatePage = (topic) => {
 		const data = this.props.list;
-		let images;
+		let images = null;
 
 		try {
-			images = data[topic].map( (item, index) => <Image src={item.url} key={index} title={item.title}/> );
+			if (topic === 'customSearch') {
+				for (let key in data.customSearch) {
+					images = data.customSearch[key].map( (item, index) => <Image src={item.url} key={index} title={item.title}/> );
+				}
+			}else {
+				images = data[topic].map( (item, index) => <Image src={item.url} key={index} title={item.title}/> );
+			}
 		}catch {
    	  images = (<li className="not-found">
             		 <h3>No Results Found</h3>
@@ -31,14 +31,9 @@ class Gallery extends Component {
             		 <p>Make sure to use the search function.</p>
         			 </li>);
 		}
-		this.hasCustomLoaded(true);
 		return images;
 	}
-
-	hasCustomLoaded = (answer) => {
-		this.state.customLoaded = answer;
-	}
-
+	
 	render() {
 		const topic = this.props.routeProp.match.params.topic;
 		return (
@@ -49,7 +44,8 @@ class Gallery extends Component {
 		    <ul>
 			    <Switch>
 			    	<Route exact path="/gallery" render={() => <Redirect to="/gallery/cats"/>}/>
-			    	<Route exact path="/gallery/customSearch" render={({match}) => this.populatePage('customSearch') }/>
+			    	<Route exact path="/gallery/customSearch" 
+			    				 render={() => this.populatePage('customSearch') }/>
 			    	<Route path="/gallery/:topic" render={(routeProp) => this.populatePage(routeProp.match.params.topic) }/>
 			    </Switch>
 				</ul>
