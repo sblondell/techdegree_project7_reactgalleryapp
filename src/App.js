@@ -9,9 +9,10 @@ class App extends Component {
 	constructor() {
 		super();
 		this.state = {
-			gallery: { customSearch: [] },
+			gallery: {},
 			apiKey: APIKey,
 			customLoaded: false,
+			customSearchTerm: '',
 			preLoading: true,
 		};
 	}
@@ -32,20 +33,26 @@ class App extends Component {
 																															${item.server}/${item.id}_${item.secret}_n.jpg`,
 								            																	title: item.title}));
 	        	const tempObj = {}; //Temporary working object to help replace the state.gallery object
-	        	let customLoaded;
+	        	let customLoaded = false;
+	        	let customSearchTerm = '';
 
-	        	if (fillStaticGallery) {
-	        		tempObj[topic] = imgInfo;
-	        		customLoaded = false;
-	        	}else {
-	        		const temp2 = {};
-	        		temp2[topic] = imgInfo;
-	        		tempObj['customSearch'] = temp2;
-	        		customLoaded = true;
-	        	}
+	        	// if (fillStaticGallery) {
+        		tempObj[topic] = imgInfo;
+        		if (!fillStaticGallery && this.state.customSearchTerm !== topic) {
+        			console.log("INININII");
+        			customLoaded = true;
+        			customSearchTerm = topic;
+        		}
+	        	// }else {
+	        		// const temp2 = {};
+	        		// temp2[topic] = imgInfo;
+	        		// tempObj['customSearch'] = temp2;
+	        		
+	        	// }
 						this.setState(prevState => ({	gallery: {...prevState.gallery, ...tempObj},
-																					customLoaded: customLoaded,
-																					preLoading: false
+																					customLoaded,
+																					preLoading: false,
+																					customSearchTerm
 																				}));
 				  })
 					.catch(error => console.error("There was a problem: " + error));
@@ -54,6 +61,7 @@ class App extends Component {
 	}
 
 	componentDidMount() {
+  	console.log(this);
   	Promise.all([this.searchManager(true, 'birds', 'cats', 'dogs')])
 			.catch(err => `There was a problem with initial loading of images ${err}`);
 	}
@@ -62,30 +70,40 @@ class App extends Component {
 		this.searchManager(false, searchTerm);	
 	}
 
-	userSearchRendered = () => {
-		this.searchManager(false, null);
-		console.log("search used");
+	renderCustom = () => {
+	 	const customSearchKey = this.state.customSearchTerm;
+	 	console.log(customSearchKey);
+		return (
+				<Redirect to={`/gallery/cats`}/>
+		);
 	}
 
   render() {
+  	const { customSearchTerm } = this.state;
+  	const { customLoaded } = this.state;
+  	const propsForGallery = {	customSearchTerm: customSearchTerm,
+															customLoaded: customLoaded,
+															list: this.state.gallery }
     return (
+    	<div>
     	<BrowserRouter>
 	    	<div>
 		    	<Header getSearch={this.handleSubmit}/>
-		    	{ this.state.customLoaded ? <Redirect to="/gallery/customSearch"/> : null }
-		    	{ this.state.preLoading ? <p>Loading...</p> :
-		    		<Switch>
-		    		  <Route exact path="/" render={() => <Redirect to="/gallery"/>}/>
-	    			 	<Route exact path="/gallery" render={ routeProp => <Gallery routeProp={routeProp}/> }/>
-	    			  <Route path="/gallery/:topic" render={ routeProp => <Gallery routeProp={routeProp}
-	    			  																														 userSearchRendered={this.userSearchRendered}
-			    			  																												 list={this.state.gallery}/> }/>
-		    			  	                                                
-		    			<Route render={ () => <p> DIDN"T LOAD </p> }/>
-		    	 	</Switch>
-		    	}
-	    	</div>
+	 				{ this.state.preLoading ?
+	 						<p>Loading...</p> :
+							<Switch>
+							  <Route exact path="/"
+							  			 render={ routeProp => <Gallery {...routeProp} {...propsForGallery}/> }/>
+							  <Route exact path="/gallery"
+							  			 render={ routeProp => <Gallery {...routeProp} {...propsForGallery}/> }/>
+							  <Route path="/gallery/:topic"
+							  			 render={ routeProp => <Gallery {...routeProp} {...propsForGallery}/> }/>
+							  <Route render={() => <p>NOT FOUND</p> }/>
+							</Switch>
+					}
+				</div>
 	    </BrowserRouter>
+	    </div>
     );
   }
 }

@@ -1,15 +1,16 @@
 import React from 'react';
+import {withRouter} from 'react-router-dom';
 
 import SearchForm from './SearchForm.js';
 import NavBar from './NavBar.js';
 
-const Header = ({ getSearch, changeLoadingState }) => {
+const Header = ({ getSearch }) => {
 	const title = "Dummy text";
 	return (
 		<div>
 			<p>{title}</p>
 			<br />
-			<SearchForm getSearch={getSearch} changeLoadingState={changeLoadingState}/>
+			<SearchForm getSearch={getSearch}/>
 			<br />
 			<NavBar />
 		</div>
@@ -17,4 +18,4 @@ const Header = ({ getSearch, changeLoadingState }) => {
 }
 
 
-export default Header;
+export default withRouter(Header);

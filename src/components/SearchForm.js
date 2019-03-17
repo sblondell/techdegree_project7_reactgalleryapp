@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 import Gallery from './Gallery.js';
 
 class SearchForm extends Component {
   handleSubmit = (e) => {
     e.preventDefault();
     this.props.getSearch(this.query.value);
+    this.props.history.push(`/gallery/${this.query.value}`);
     e.currentTarget.reset();
   }
 
@@ -27,5 +28,5 @@ class SearchForm extends Component {
 }
 
 
-export default SearchForm;
+export default withRouter(SearchForm);
 

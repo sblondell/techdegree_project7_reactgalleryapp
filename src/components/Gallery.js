@@ -12,18 +12,12 @@ class Gallery extends Component {
 	 * @return  {Array}  images - array of JSX Image components || "search not found" message
 	*/
 	//const populatePage = (topic) => {
-	populatePage = (topic) => {
+	populatePage = (topic = 'cats') => {
 		const data = this.props.list;
 		let images = null;
 
 		try {
-			if (topic === 'customSearch') {
-				for (let key in data.customSearch) {
-					images = data.customSearch[key].map( (item, index) => <Image src={item.url} key={index} title={item.title}/> );
-				}
-			}else {
-				images = data[topic].map( (item, index) => <Image src={item.url} key={index} title={item.title}/> );
-			}
+			images = data[topic].map( (item, index) => <Image src={item.url} key={index} title={item.title}/> );
 		}catch {
    	  images = (<li className="not-found">
             		 <h3>No Results Found</h3>
@@ -33,21 +27,22 @@ class Gallery extends Component {
 		}
 		return images;
 	}
-	
+
 	render() {
-		const topic = this.props.routeProp.match.params.topic;
+		console.log(this);
+		const topic = this.props.match.params.topic || 'cats';
+		const title = (this.props.match.params.topic ? 
+										`Results For ${this.props.match.params.topic}` : 
+										`Welcome, have some ${topic}...`);
+		console.log("TOPIC " + title);
+
 		return (
 			<div className="photo-container">
 				<br />
-		    <h2>Results for {topic}</h2>
+		    <h2>{title}</h2>
 		    <br />
 		    <ul>
-			    <Switch>
-			    	<Route exact path="/gallery" render={() => <Redirect to="/gallery/cats"/>}/>
-			    	<Route exact path="/gallery/customSearch" 
-			    				 render={() => this.populatePage('customSearch') }/>
-			    	<Route path="/gallery/:topic" render={(routeProp) => this.populatePage(routeProp.match.params.topic) }/>
-			    </Switch>
+		    	{this.populatePage(topic)}
 				</ul>
 			</div>
 		);
@@ -60,8 +55,7 @@ export default Gallery;
       		* same--the user sees the URL reflect their choice, but this method 
       	  * makes the app more modular.   
 
-
-      	  			    	<Route exact path="/gallery" render={() => <Redirect to="/gallery/cats"/>}/>
-			    	<Route exact path="/gallery/customSearch" render={({match}) => this.populatePage('customSearch') }/>
+		    	<Route path="/gallery/:topic" render={(routeProp) => <p>routeProp</p> }/>
 			    	<Route path="/gallery/:topic" render={(routeProp) => this.populatePage(routeProp.match.params.topic) }/>
+
  */}
