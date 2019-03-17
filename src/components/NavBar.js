@@ -5,7 +5,7 @@ const NavBar = () => {
 	return (
 		<nav className="main-nav">
 			<ul>
-			<li><NavLink exact to="/gallery/cats">Cats</NavLink></li>
+			<li><NavLink to="/gallery/cats">Cats</NavLink></li>
 			<li><NavLink to="/gallery/dogs">Dogs</NavLink></li>
 			<li><NavLink to="/gallery/birds">Birds</NavLink></li>
 			</ul>

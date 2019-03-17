@@ -9,65 +9,66 @@ class App extends Component {
 	constructor() {
 		super();
 		this.state = {
-			gallery: {},
+			gallery: { customSearch: [] },
 			apiKey: APIKey,
 			loading: true,
 		};
 	}
 
-	getSearch = searchTerm => {
-		let url = `https://api.flickr.com/services/rest/?method=flickr.photos.search\
-							&api_key=${this.state.apiKey}&tags=${searchTerm}&per_page=24&format=json&nojsoncallback=1`;
+	getSearch = (fillStaticGallery = false, ...searchTerms) => {
+		searchTerms.forEach( topic => {
+			let url = `https://api.flickr.com/services/rest/?method=flickr.photos.search\
+								&api_key=${this.state.apiKey}&tags=${topic}&per_page=24&format=json&nojsoncallback=1`;
 
-		let promise = fetch(url)
-			.then(response => response.json())
-			.then(data => {
-				// Creating an array of objects (image information)
-				const imgInfo = 
-					data.photos.photo
-					.map( item => {
-						return ({ url: `https://farm${item.farm}.staticflickr.com/${item.server}/${item.id}_${item.secret}_n.jpg`,
-						          title: item.title })
-					})
-				// Creating a new 'object' with the key being the user's search criteria
-				const newObj = {};
-				newObj[searchTerm] = imgInfo; 
+			fetch(url)
+				.then(response => response.json())
+				.then(({photos}) => {
+					// Creating an array of objects (image information)
+					const imgInfo = photos.photo.map( item => ({url: `https://farm${item.farm}.staticflickr.com/\
+																														${item.server}/${item.id}_${item.secret}_n.jpg`,
+							            																	title: item.title}));
+        	const tempObj = {}; //Temporary working object to help replace the state.gallery object
 
-        // Set the gallery state to the previous gallery entries, plus the new entry;
-        // all organized by user's search string.
-				this.setState(prevState => ({	gallery: {...prevState.gallery, ...newObj},
-																			customSearch: searchTerm,
-																			loading: false }));
-		  })
-			.catch(error => console.error("There was a problem: " + error));
-			return promise;
+        	if (fillStaticGallery) {
+        		tempObj[topic] = imgInfo;
+        	}else {
+        		const temp2 = {};
+        		temp2[topic] = imgInfo;
+        		tempObj['customSearch'] = temp2;
+        	}
+					this.setState(prevState => ({	gallery: {...prevState.gallery, ...tempObj},
+																				loading: false
+																			}));
+					console.log(tempObj);
+			  })
+				.catch(error => console.error("There was a problem: " + error));
+			});
 	}
 
 	componentDidMount() {
-		Promise.all([
-			this.getSearch('cats'),
-			this.getSearch('dogs'),
-			this.getSearch('birds')])
-		.catch(err => `There was a problem with initial loading of images ${err}`);
+  	Promise.all([this.getSearch(true, 'birds', 'cats', 'dogs')])
+			.catch(err => `There was a problem with initial loading of images ${err}`);
+	}
+
+	handleSubmit = (searchTerm) => {
+		this.getSearch(false, searchTerm);	
 	}
 
   render() {
     return (
     	<HashRouter>
 	    	<div>
-		    	<Header />
-
-		    	{ this.state.loading ?
-		    			<p>Loading...</p> :
-			    		<Switch>
-		    			  <Route exact path="/"
-		    							 render={() => <Redirect to="/gallery/:topic"/>}/>,
-		    			  <Route path="/gallery/:topic"
-		    					     render={props => <Gallery
-		    					     										list={this.state.gallery}
-		    					     										getSearch={this.getSearch}
-		    					     										routeProp={props} />} />
-			    		</Switch>
+		    	<Header getSearch={this.handleSubmit}/>
+		    	{ this.state.loading ? <p>Loading...</p> :
+		    		<Switch>
+		    		  <Route exact path="/" render={() => <Redirect to="/gallery"/>}/>
+	    			 	<Route exact path="/gallery" render={ (routeProp) => <Gallery routeProp={routeProp}
+	    			  																												list={this.state.gallery}/> }/>
+	    			  <Route path="/gallery/:topic" render={ (routeProp) => <Gallery routeProp={routeProp}
+	    			  																												list={this.state.gallery}/> }/>
+		    			  	                                                
+		    			<Route render={ () => <p> DIDN"T LOAD </p> }/>
+		    	 	</Switch>
 		    	}
 	    	</div>
 	    </HashRouter>

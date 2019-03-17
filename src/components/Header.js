@@ -1,4 +1,6 @@
 import React from 'react';
+
+import SearchForm from './SearchForm.js';
 import NavBar from './NavBar.js';
 
 const Header = ({ getSearch }) => {
@@ -6,6 +8,9 @@ const Header = ({ getSearch }) => {
 	return (
 		<div>
 			<p>{title}</p>
+			<br />
+			<SearchForm getSearch={getSearch} />
+			<br />
 			<NavBar />
 		</div>
 	);
