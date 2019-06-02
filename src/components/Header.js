@@ -5,7 +5,7 @@ import SearchForm from './SearchForm.js';
 import NavBar from './NavBar.js';
 
 const Header = ({ getSearch }) => {
-	const title = "Dummy text";
+	const title = <h1>Image Gallery</h1>;
 
 	return (
 		<div>
